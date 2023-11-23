@@ -1,0 +1,88 @@
+<!--In index.html we have to extend code of base.html-->
+{% extends 'base.html' %} <!--only nav bar is showing but the markup code is not run so we show this markup in base.html  in the middle of nav bar and the scripts-->
+  <!--body-->
+<!--go to views.py and render the header-->
+
+  {% load cart %}
+
+  {% block content %}
+  {% load custom_filter %}
+  <div class="containerfluid mt-3">
+    <div class="row">
+
+
+      <!--creating column inside row-->
+      <!--filter-->
+
+      <div class="col-lg-3 mx-auto">
+        <div class="list-group">
+          <!-- for showing all products we have to show same page using / -->
+          <a href="/" class="list-group-item    
+           list-group-item-action ">All products</a>
+
+          {% for category in categories %}
+          <a href="/?category={{category.id}}" class="list-group-item
+           list-group-item-action ">{{category.name}}</a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!--products-->
+      <!--then we have to show category so we have to collect categorys from database and then we pass to index.html as we pass product so we have to pass list of categories-->
+      <div id="products" class="col-lg-9 mx-auto">
+        <div class="row mx-auto">
+          {% for product in products %}
+          <!--<h4>{{product}}</h4>-->
+          <!--show in table form-->
+          <div class="card mx-auto mb-3" id={{product.id}} style="width: 18rem;"> <!--mb-3 is margin and pb-n is padding-->
+            <img style="height : 300px" class="card-img-top, img-fluid" src="{{product.image.url}}" alt="Responsive image">
+            <!--            <img src="..." class="img-fluid" alt="Responsive image">-->
+            <div class="card-body">
+              <p class="card-title">{{product.name}}</p>
+              <!-- <p class="card-text">{{product.description}}</p> -->
+              <p class="card-text"><b>{{product.price|currency}}</b></p>
+              <!-- {{product | is_in_cart:request.session.cart}} checking product is present in cart or not -->
+              
+
+            </div>
+
+            <div class="cart-footer p-0 no-gutters">
+
+              {% if product|is_in_cart:request.session.cart %} 
+              <div class="row no-gutters">
+                <!--show this button when product is already in cart -->
+                <form action="/#{{product.id}}" class="col-2" method="post">
+                  {% csrf_token %}
+                  <input hidden type="text" name="product" value='{{product.id}}'>
+                  <input hidden type="text" name="remove" value='True'>  <!--now we have to code for server if there is remove value then we have to minus the cart product quantity-->
+                  <input type="submit" value=" - " class="btn btn-block btn-secondary">
+                </form>
+                <div class="text-center col">{{product|cart_quantity:request.session.cart}} in cart</div>
+                <form action="/#{{product.id}}" class="col-2" method="post">
+                  {% csrf_token %}
+                  <input hidden type="text" name="product" value='{{product.id}}'>
+                  <input type="submit" value=" + " class="btn btn-block btn-secondary">
+                </form>
+  
+              </div>
+              {% else %}           
+              <form action="/#{{product.id}}" method="POST" class="btn-block">
+                {% csrf_token %}
+                <input hidden type="text" name="product" value='{{product.id}}'>
+                <input type="submit" class="float-right btn btn-light border form-control " value="Add to cart">
+              </form>
+              {% endif %}
+              <!-- we have to conditionally hide and show the add to cart and the -,+ btn we are gonna do with the help of filter-->           
+            </div>           
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  
+
+
+  {% endblock %}
